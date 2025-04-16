@@ -14,59 +14,30 @@ import ImageIcon from "@mui/icons-material/Image";
 import "@/styles/transactionbank.css";
 import * as XLSX from "xlsx";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
-
-import fooddrink from "@/assets/images/spends/spend_fooddrink.png";
-import spend135 from "@/assets/images/spends/spend_135.png";
-import spend136 from "@/assets/images/spends/spend_136.png";
-import spend124 from "@/assets/images/spends/spend_124.png";
-import spend134 from "@/assets/images/spends/spend_134.png";
-import spend125 from "@/assets/images/spends/spend_125.png";
-import spend139 from "@/assets/images/spends/spend_139.png";
-import income143 from "@/assets/images/income/income_143.png";
-import incomeinterestmoney from "@/assets/images/income/income_interestmoney.png";
-import incomeother from "@/assets/images/income/income_other.png";
-import incomesalary from "@/assets/images/income/income_salary.png";
-import lend140 from "@/assets/images/lend/lend_140.png";
-import lend141 from "@/assets/images/lend/lend_141.png";
-import lenddebt from "@/assets/images/lend/lend_debt.png";
-import lendloan from "@/assets/images/lend/lend_loan.png";
 import ImageFileSelect from "@/app/components/modal/ImageFileSelect";
 import request from "@/util/request";
-
-const GROUP = [
-  { id: 1, name: "Ăn uống", image: fooddrink, category: "spend" },
-  { id: 2, name: "Hoá đơn", image: spend135, category: "spend" },
-  { id: 3, name: "Tiền nhà", image: spend136, category: "spend" },
-  { id: 4, name: "Điện nước", image: spend124, category: "spend" },
-  { id: 5, name: "Tiền điện thoại", image: spend134, category: "spend" },
-  { id: 6, name: "Internet", image: spend125, category: "spend" },
-  { id: 7, name: "Tiền gas", image: spend139, category: "spend" },
-  { id: 8, name: "Tiền chuyển đến", image: income143, category: "income" },
-  { id: 9, name: "Tiền lãi", image: incomeinterestmoney, category: "income" },
-  { id: 10, name: "Tiền khác", image: incomeother, category: "income" },
-  { id: 11, name: "Tiền lương", image: incomesalary, category: "income" },
-  { id: 12, name: "Cho nợ", image: lend140, category: "lend" },
-  { id: 13, name: "Vay nợ", image: lend141, category: "lend" },
-  { id: 14, name: "Cho vay", image: lenddebt, category: "lend" },
-  { id: 15, name: "Đi vay", image: lendloan, category: "lend" },
-];
+import { TRANSACTION_TYPES } from "@/util/transaction_types";
 const banks = ["MBbank", "Techcombank", "Vietcombank", "BIDV", "TPBank"];
 const Bank = () => {
   const [input, setInput] = useState<any>({
-    money: "",
-    note: "",
+    amount: "",
+    description: "",
     date: "",
     imageFile: null,
-    name: "Chọn nhóm",
+    name: "",
     image: "",
   });
   const [transactions, setTransactions] = useState<any>([]);
   const [openImageSelect, setOpenImageSelect] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("spend");
-  const [selectedBank, setSelectedBank] = useState<string>("");
+  const [filter, setFilter] = useState<any>({
+    bank: "",
+    startDate: "",
+    endDate: "",
+  });
   const [extentionBank, setExtentionBank] = useState<any[]>([]);
-  console.log(extentionBank);
-  const filterGroup = GROUP.filter(
+  const [selectedTransaction, setSelectedTransaction] = useState<any>(null);
+  const filterGroup = TRANSACTION_TYPES.filter(
     (item) => item.category === selectedCategory
   );
 
@@ -78,10 +49,25 @@ const Bank = () => {
     setInput({ ...input, image: image, name: name });
   };
   const handleSelectOptionExcel = (id: number, money: number, date: string) => {
-    setInput({ ...input, money: money, date: date });
+    setInput({ ...input, amount: money, date: date });
     setTransactions((prev: any) =>
       prev.filter((item: any) => item["STT\r\nNo"] !== id)
     );
+  };
+
+  const handleSelectOptionExtention = (
+    id: number,
+    amount: number,
+    date: string
+  ) => {
+    setInput({ ...input, amount: amount, date: date });
+    const selected = extentionBank.find((item: any) => item.id === id);
+    setSelectedTransaction(selected);
+    if (amount < 0) {
+      setSelectedCategory("spend");
+    } else {
+      setSelectedCategory("income");
+    }
   };
 
   const VisuallyHiddenInput = styled("input")({
@@ -113,33 +99,84 @@ const Bank = () => {
     reader.readAsArrayBuffer(file);
   };
 
-  const handleChange = async (event: any) => {
-    const bank = event.target.value;
-    setSelectedBank(bank);
-
+  const handleFilterTransaction = async () => {
     try {
       const token = localStorage.getItem("token");
+      if (!token || !filter.bank) return;
       const response = await request({
         method: "GET",
-        url: `/transaction/user/bank/${bank}`,
+        url: `/transaction/user/${filter.bank}`,
+        params: {
+          startDate: filter.startDate,
+          endDate: filter.endDate,
+        },
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      const data = response.data;
-      setExtentionBank(data);
+      setExtentionBank(response.data);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
     }
   };
 
+  const handleSave = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("amount", input.amount);
+      formData.append("name", input.name);
+      formData.append("image", input.image);
+      formData.append("description", input.description);
+      formData.append("date", input.date);
+      formData.append("category", selectedCategory);
+      if (input.imageFile) {
+        formData.append("imageFile", input.imageFile);
+      }
+      const response = await request({
+        method: "POST",
+        url: "/transaction_type/add",
+        data: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      if (response.status === 201) {
+        if (selectedTransaction) {
+          await request({
+            method: "PATCH",
+            url: `/transaction/${selectedTransaction.id}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        }
+        setExtentionBank((prev: any) =>
+          prev.filter((item: any) => item.id !== selectedTransaction.id)
+        );
+        alert("Thêm giao dịch thành công!");
+        setInput({
+          amount: "",
+          name: "",
+          image: "",
+          description: "",
+          date: "",
+          imageFile: null,
+        });
+      }
+    } catch (error: any) {
+      console.log("error detail", error.response?.data);
+      console.log(error);
+    }
+  };
+
   return (
     <>
-      <div className="p_40">
-        <div className="b_gw p_20 b_r20">
-          <div className="f_s20 d_f j_cs">
-            <div>Cập nhật lịch sử giao dịch từ ngân hàng</div>
-            <div className="w_56 d_f j_cs">
+      <div className="b_gw">
+        <div className="p_10">
+          <div className="d_f j_cs a_i">
+            <div className="">
               <Button
                 variant="contained"
                 size="small"
@@ -153,9 +190,20 @@ const Bank = () => {
                 />
                 File UpLoad
               </Button>
-              <FormControl className="w_40">
+              &nbsp;
+              <Button variant="contained" size="small">
+                Tải extention
+              </Button>
+            </div>
+            <div className="w_25">
+              <FormControl className="w_100">
                 <InputLabel>Bank</InputLabel>
-                <Select value={selectedBank} onChange={handleChange}>
+                <Select
+                  value={filter.bank}
+                  onChange={(e) =>
+                    setFilter({ ...filter, bank: e.target.value })
+                  }
+                >
                   {banks.map((bank) => (
                     <MenuItem key={bank} value={bank}>
                       {bank}
@@ -163,18 +211,52 @@ const Bank = () => {
                   ))}
                 </Select>
               </FormControl>
+            </div>
+            <div>
+              <DatePicker
+                value={filter.startDate ? dayjs(filter.startDate) : null}
+                onChange={(date: string) => {
+                  if (date) {
+                    setFilter({
+                      ...filter,
+                      startDate: dayjs(date).format("YYYY-MM-DD"),
+                    });
+                  }
+                }}
+              />
+              &nbsp;
+              <DatePicker
+                value={filter.endDate ? dayjs(filter.endDate) : null}
+                onChange={(date: string) => {
+                  if (date) {
+                    setFilter({
+                      ...filter,
+                      endDate: dayjs(date).format("YYYY-MM-DD"),
+                    });
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="p_40">
+        <div className="b_gw p_20 b_r20">
+          <div className="f_s20 d_f j_cs">
+            <div>Cập nhật lịch sử giao dịch từ ngân hàng</div>
+            <div>
               <Button
                 variant="contained"
                 size="small"
-                // onClick={downloadExtension}
+                onClick={handleFilterTransaction}
               >
-                Tải extention
+                Filter Transaction
               </Button>
             </div>
           </div>
           <div className="d_f p_t20 w_100 j_cs">
-            <div className="w_40 b_g b_r20 ">
-              <div className="p_20">
+            <div className="w_40 b_gx b_r20 ">
+              <div className="p_10">
                 <div className="b_gw b_r15">
                   <div className="d_f">
                     <div
@@ -182,6 +264,7 @@ const Bank = () => {
                         selectedCategory === "spend" ? "active" : ""
                       }`}
                       onClick={() => handleSelectCategory("spend")}
+                      style={{cursor: 'pointer'}}
                     >
                       Khoản chi
                     </div>
@@ -190,21 +273,23 @@ const Bank = () => {
                         selectedCategory === "income" ? "active" : ""
                       }`}
                       onClick={() => handleSelectCategory("income")}
+                      style={{cursor: 'pointer'}}
                     >
                       Khoản thu{" "}
                     </div>
                   </div>
-                  <div className="b_t">
+                  <div className="b_tx">
                     <div className="p_10">
                       <div className="scroll_bank">
                         {filterGroup.map((item) => {
                           return (
                             <div
                               key={item.id}
-                              className="d_f a_i b_g b_r15 m_t5"
+                              className="d_f a_i b_gx b_r15 m_t5"
                               onClick={() =>
                                 handleSelectGpup(item.image, item.name)
                               }
+                              style={{cursor: 'pointer'}}
                             >
                               <img className="s_40" src={item.image} />
                               <div className="p_l10">{item.name}</div>
@@ -214,21 +299,22 @@ const Bank = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="p_10 t_a b_t">
-                    <Button
-                      className="w_100"
-                      variant="contained"
-                      size="small"
-                      onClick={() => setSelectedCategory("lend")}
+                  <div className="b_tx ">
+                    <div
+                      className={`p_10 t_a cate_item ${
+                        selectedCategory === "lend" ? "active" : ""
+                      }`}
+                      onClick={() => handleSelectCategory("lend")}
+                      style={{cursor: 'pointer'}}
                     >
                       Vay/nợ
-                    </Button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="w_56 b_g b_r20">
-              <div className="p_20">
+            <div className="w_56 b_gx b_r20">
+              <div className="p_10">
                 <div className="srcoll_bank_right b_r15">
                   {transactions.length > 0 &&
                     transactions.map((item: any) => (
@@ -269,40 +355,69 @@ const Bank = () => {
                         </div>
                       </div>
                     ))}
-                    {extentionBank.length > 0 &&
-                      extentionBank.map((item: any) => (
-                        <div
+                  {extentionBank.length > 0 &&
+                    extentionBank.map((item: any) => (
+                      <div
                         className="b_gw p_10 b_r15 a_i m_t5"
+                        onClick={() =>
+                          handleSelectOptionExtention(
+                            item.id,
+                            item.amount,
+                            item.date
+                          )
+                        }
                       >
                         <div key={item.id}>
                           <div>Thông báo biến động số dư</div>
                           <div>
-                            GD:{" "} {item.amount}{" "} VND
-                            | {item.date} |ND:{" "}
-                            {item.description}
+                            GD: {Number(item.amount).toLocaleString("vi-VN")}{" "}
+                            VND | Date: {item.date} | ND: {item.description}
                           </div>
                         </div>
                       </div>
-                      ))}
+                    ))}
                 </div>
               </div>
             </div>
           </div>
           <div className="p_t20 w_100">
-            <div className="b_g b_r15">
+            <div className="b_gx b_r15">
               <div className="p_10 d_f g_20">
-                <input
-                  className="p_10 b_r15 w_25 t_a"
-                  placeholder="Nhập số tiền"
-                  value={`${input.money} VND`}
-                />
+                <div className="w_25 b_gw b_r15 d_f a_i">
+                  <input
+                    className="p_l10 b_n"
+                    placeholder="Nhập số tiền"
+                    value={
+                      input.amount
+                        ? Number(input.amount).toLocaleString("vi-VN")
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const rawValue = e.target.value.replace(/[^0-9]/g, "");
+                      setInput({ ...input, amount: rawValue });
+                    }}
+                  />
+                  <span className="c_x">VND</span>
+                </div>
                 <div className="p_10 b_r15 d_f a_i b_gw w_25">
-                  <img className="s_40 b_r50 b_g" src={input.image} />
+                  <img className="s_40 b_r50 b_gx" src={input.image} />
                   <div className="p_l10">{input.name}</div>
                 </div>
-                <input className="p_10 b_r15 w_25" placeholder="Ghi chú" />
+                <input
+                  className="p_10 b_r15 w_25 b_n"
+                  placeholder="Ghi chú"
+                  value={input.description}
+                  onChange={(e) => {
+                    setInput({ ...input, description: e.target.value });
+                  }}
+                />
                 <div className="">
-                  <Button variant="contained" size="small" className="w_100">
+                  <Button
+                    variant="contained"
+                    size="small"
+                    className=""
+                    onClick={handleSave}
+                  >
                     Lưu
                   </Button>
                 </div>

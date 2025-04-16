@@ -8,13 +8,14 @@ import InvestLayout from "@/app/layouts/InvestLayout";
 import { DEFAULT_LAYOUT,INVEST_LAYOUT, NONE_LAYOUT } from "@/constants/layout";
 import URL from "@/constants/url";
 import NoneLayout from "@/app/layouts/NoneLayout";
-
+import PrivateRoute from "@/app/layouts/PrivateRoute";
 const Home = lazy(() => import("@/app/pages/home"));
 const Spend = lazy(() => import("@/app/pages/home/Spend"));
 const Total = lazy(() => import("@/app/pages/investment/Total"));
 const Accumulate = lazy(() => import("@/app/pages/investment/Accumulate"));
 const FundCertificate = lazy(() => import("@/app/pages/investment/FundCertificate"));
 const Gold = lazy(() => import("@/app/pages/investment/Gold"));
+const Crypto = lazy(() => import("@/app/pages/investment/Crypto"));
 const Income = lazy(() => import("@/app/pages/home/Income"));
 const Lend = lazy(() => import("@/app/pages/home/Lend"));
 const Bank = lazy(() => import("@/app/pages/home/Banktransaction"));
@@ -23,6 +24,7 @@ const Notification = lazy(() => import("@/app/pages/notifications"));
 const Market = lazy(() => import("@/app/pages/market"));
 const Login = lazy(() => import("@/app/pages/login"));
 const Register = lazy(() => import("@/app/pages/register"));
+const NotFound = lazy(() => import("@/app/pages/results/NotFound"));
 
 
 const menuShared  = [
@@ -35,6 +37,12 @@ const menuShared  = [
   {
     key: URL.Register,
     components: <Register/>,
+    layout: NONE_LAYOUT,
+    private: false,
+  },
+  {
+    key: "*",
+    components: <NotFound/>,
     layout: NONE_LAYOUT,
     private: false,
   }
@@ -62,6 +70,12 @@ const menuInvest = [
   {
     key: URL.Gold,
     components: <Gold/>,
+    layout: INVEST_LAYOUT,
+    private: true,
+  },
+  {
+    key: URL.Crypto,
+    components: <Crypto/>,
     layout: INVEST_LAYOUT,
     private: true,
   }
@@ -123,6 +137,10 @@ const Routers = () => {
       {menus.map((item: any) => {
         let element = item.components;
         element = <Suspense fallback={null}>{element}</Suspense>
+
+        if (item.private) {
+          element = <PrivateRoute>{element}</PrivateRoute>
+        }
         if (item.layout === DEFAULT_LAYOUT){
           element = <DefaultLayout>{element}</DefaultLayout>
         }

@@ -41,25 +41,25 @@ const Slidebar = () => {
           </div>
         </div>
         <div>
-          <div  className={`d_f a_i slidebar_menu_item ${activeMenu === "home" ? "active" : ""}`} onClick={() => handleChangeMenuHome("home", "/")}>
+          <div style={{ cursor: "pointer" }}  className={`d_f a_i slidebar_menu_item ${activeMenu === "home" ? "active" : ""}`} onClick={() => handleChangeMenuHome("home", "/")}>
             <div className="menu_item_icon">
               <Home style={{ fontSize: "35px" }} />
             </div>
             <div>Trang chủ</div>
           </div>
-          <div className={`d_f a_i slidebar_menu_item ${activeMenu === "investment" ? "active" : ""}`} onClick={() => handleChangeMenuHome("investment", "/investment/assets/total")}>
+          <div style={{ cursor: "pointer" }} className={`d_f a_i slidebar_menu_item ${activeMenu === "investment" ? "active" : ""}`} onClick={() => handleChangeMenuHome("investment", "/investment/assets/total")}>
             <div className="menu_item_icon">
               <BusinessCenter style={{ fontSize: "35px" }} />
             </div>
             <div>Đầu tư</div>
           </div>
-          <div className={`d_f a_i slidebar_menu_item ${activeMenu === "market" ? "active" : ""}`} onClick={() => handleChangeMenuHome("market", "/market")}>
+          <div style={{ cursor: "pointer" }} className={`d_f a_i slidebar_menu_item ${activeMenu === "market" ? "active" : ""}`} onClick={() => handleChangeMenuHome("market", "/market")}>
             <div className="menu_item_icon">
               <SignalCellularAlt style={{ fontSize: "35px" }} />
             </div>
             <div>Thị trường</div>
           </div>
-          <div className= "d_f a_i slidebar_menu_item">
+          <div style={{ cursor: "pointer" }} className= "d_f a_i slidebar_menu_item" onClick={() => handleChangeMenuHome("market", "/market")}>
             <div className="menu_item_icon">
               <AccountBalanceWallet style={{ fontSize: "35px" }} />
             </div>

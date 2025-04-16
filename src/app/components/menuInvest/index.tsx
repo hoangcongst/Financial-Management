@@ -12,6 +12,7 @@ const URL = [
   {id: 2, path: "/investment/assets/accumulate", menu: "tichluy"},
   {id: 3, path: "/investment/assets/fundcertificate", menu: "chungchiquy"},
   {id: 4, path: "/investment/assets/gold", menu: "vang"},
+  {id: 5, path: "/investment/assets/crypto", menu: "coin"},
 ]
 
 const MenuInvest = () => {
@@ -58,7 +59,7 @@ const MenuInvest = () => {
             <div>0đ</div>
           </div>
         </div>
-        <div className="d_f p_5 m_r20">
+        <div className={`d_f p_5 m_r20 menu_invest_item ${active === "coin" ? "active" : ""}`} onClick={() => handleChangeMenuInvest("coin", "/investment/assets/crypto")}>
           <img className="s_35" src={logo_coin} />
           <div className="p_l10">
             <div>Coin</div>

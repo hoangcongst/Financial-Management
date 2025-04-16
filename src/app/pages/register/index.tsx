@@ -23,7 +23,7 @@ const Register = () => {
         data: { email: userData.email, username: userData.username, password: userData.password },
       });
       const data = response.data;
-      if (response.status === 200) {
+      if (response.status === 201) {
         alert("Đăng ký thành công! Hãy đăng nhập.");
         navigate("/login");
       } else {

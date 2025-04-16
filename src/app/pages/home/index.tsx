@@ -1,101 +1,81 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import "@/styles/home.css";
 import logo_tichluy from "@/assets/images/logo/logo_tichluy.png";
 import logo_chungchiquy from "@/assets/images/logo/logo_chungchiquy.png";
 import logo_coin from "@/assets/images/logo/logo_coin.png";
 import logo_vang from "@/assets/images/logo/logo_vang.png";
 import { Button } from "@mui/material";
-// import { Line } from "react-chartjs-2";
-// import {
-//   Chart as ChartJS,
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   Title,
-//   Tooltip,
-//   Legend,
-// } from "chart.js";
+import { TrendingFlat } from "@mui/icons-material";
+
 import { useNavigate } from "react-router-dom";
-import fooddrink from "@/assets/images/spends/spend_fooddrink.png";
-import spend135 from "@/assets/images/spends/spend_135.png";
-import spend136 from "@/assets/images/spends/spend_136.png";
-import spend124 from "@/assets/images/spends/spend_124.png";
-import spend134 from "@/assets/images/spends/spend_134.png";
-import spend125 from "@/assets/images/spends/spend_125.png";
-import spend139 from "@/assets/images/spends/spend_139.png";
-import income143 from "@/assets/images/income/income_143.png";
-import incomeinterestmoney from "@/assets/images/income/income_interestmoney.png";
-import incomeother from "@/assets/images/income/income_other.png";
-import incomesalary from "@/assets/images/income/income_salary.png";
-import lend140 from "@/assets/images/lend/lend_140.png";
-import lend141 from "@/assets/images/lend/lend_141.png";
-import lenddebt from "@/assets/images/lend/lend_debt.png";
-import lendloan from "@/assets/images/lend/lend_loan.png";
+import { useEffect, useState } from "react";
+import request from "@/util/request";
 
-const SP = [
-  { id: 1, image: fooddrink, name: "Ăn uống", money: 100000 },
-  { id: 2, image: spend135, name: "Hoá đơn", money: 100000 },
-  { id: 3, image: spend136, name: "Tiền nhà", money: 100000 },
-  { id: 4, image: spend124, name: "Điện nước", money: 100000 },
-  { id: 5, image: spend134, name: "Tiền điện thoại", money: 100000 },
-  { id: 6, image: spend125, name: "Internet", money: 100000 },
-  { id: 7, image: spend139, name: "Tiền gas", money: 100000 },
-];
-
-const INCOME = [
-  { id: 1, image: income143, name: "Tiền chuyển đến", money: 100000 },
-  { id: 2, image: incomeinterestmoney, name: "Tiền lãi", money: 100000 },
-  { id: 3, image: incomeother, name: "Tiền khác", money: 100000 },
-  { id: 4, image: incomesalary, name: "Tiền lương", money: 100000 },
-];
-
-const LEND = [
-  { id: 1, image: lend140, name: "Cho nợ", money: -100000 },
-  { id: 2, image: lend141, name: "Vay nợ", money: 100000 },
-  { id: 3, image: lenddebt, name: "Cho vay", money: -100000 },
-  { id: 4, image: lendloan, name: "Đi vay", money: +100000 },
-];
-// ChartJS.register(
-//   CategoryScale,
-//   LinearScale,
-//   PointElement,
-//   LineElement,
-//   Title,
-//   Tooltip,
-//   Legend
-// );
-
-// const data = {
-//   labels: ["1/2", "2/2", "3/2", "4/2", "5/2", "6/2"],
-//   datasets: [
-//     {
-//       label: "Tổng chi tiêu tháng",
-//       data: [0, 1000000, 400, 700, 600, 900],
-//       borderColor: " rgba(255, 42, 0, 1)",
-//       backgroundColor: "rgba(75, 192, 192, 0.2)",
-//       tension: 0.4,
-//     },
-//   ],
-// };
-
-// const options = {
-//   responsive: true,
-//   plugins: {
-//     legend: { position: "top" },
-//     title: { display: true, text: "Biểu đồ chi tiêu" },
-//   },
-// };
-
+interface TransactionType {
+  spend: any[];
+  income: any[];
+  lend: any[];
+}
 const Home = () => {
   const navigate = useNavigate();
+
+  const [transactionTypes, setTransactionTypes] = useState<TransactionType>({
+    spend: [],
+    income: [],
+    lend: [],
+  });
+
+  const [transactionLog, setTransactionLog] = useState<any[]>([]);
+  console.log(transactionLog);
+
+  const fetchTransactionType = async (type: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await request({
+        method: "GET",
+        url: `transaction_type/category/${type}/current_month`,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = response.data;
+      setTransactionTypes((prev) => ({ ...prev, [type]: data }));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchTransactionLog = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await request({
+        method: "GET",
+        url: "transaction_type/current_month",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = response.data;
+      setTransactionLog(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTransactionType("spend");
+    fetchTransactionType("income");
+    fetchTransactionType("lend");
+    fetchTransactionLog();
+  }, []);
 
   return (
     <>
       <div className="home_content">
         <div className="hone_content_item">
           <div className="first_item">
-            <div className="first_item_element b_r20">
-              <div className="p_20">
+            <div className="first_item_element b_r15">
+              <div className="p_10">
                 <div>
                   <div className="f_s20">Tổng tài sản</div>
                   <div className="d_f p_t8">
@@ -152,8 +132,8 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <div className="first_item_element b_r20">
-              <div className="p_20">
+            <div className="first_item_element b_r15">
+              <div className="p_10">
                 <div className="f_s20">Tổng số dư tài khoản</div>
                 <div className="d_f p_t8">
                   <div className="f_s20">250.000đ</div>
@@ -173,15 +153,21 @@ const Home = () => {
             </div>
           </div>
           <div className="second_item">
-            <div className="second_item_element b_r20">
-              <div className="p_20">
-                <div className=" t_a">Khoản Chi</div>
+            <div className="second_item_element b_r15">
+              <div className="p_10">
+                <div
+                  className=" t_a"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate("/home/spend")}
+                >
+                  Khoản Chi
+                </div>
                 <div className="p_t8">
                   <div className="scroll_home">
-                    {SP.map((item) => (
+                    {transactionTypes.spend.map((item) => (
                       <div
                         key={item.id}
-                        className="b_g b_r15 p_10 m_t5 d_f a_i j_cs"
+                        className="b_gx b_r15 p_10 m_t5 d_f a_i j_cs"
                       >
                         <div className="d_f a_i">
                           <img
@@ -191,31 +177,30 @@ const Home = () => {
                           />
                           <div className="p_l10">{item.name}</div>
                         </div>
-                        <div className="">- {item.money}VND</div>
+                        <div className="">
+                          {Number(item.amount).toLocaleString("vi-VN")}đ
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-                <div className="t_a p_t8">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => navigate("/home/spend")}
-                  >
-                    Thêm giao dịch
-                  </Button>
                 </div>
               </div>
             </div>
-            <div className="second_item_element b_r20">
-              <div className="p_20">
-                <div className="t_a">Khoản Thu</div>
+            <div className="second_item_element b_r15">
+              <div className="p_10">
+                <div
+                  className="t_a"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate("/home/income")}
+                >
+                  Khoản Thu
+                </div>
                 <div className="p_t8">
                   <div className="scroll_home">
-                    {INCOME.map((item) => (
+                    {transactionTypes.income.map((item) => (
                       <div
                         key={item.id}
-                        className="b_g b_r15 p_10 m_t5 d_f a_i j_cs"
+                        className="b_gx b_r15 p_10 m_t5 d_f a_i j_cs"
                       >
                         <div className="d_f a_i">
                           <img
@@ -225,31 +210,30 @@ const Home = () => {
                           />
                           <div className="p_l10">{item.name}</div>
                         </div>
-                        <div className="">+ {item.money}VND</div>
+                        <div className="">
+                          {Number(item.amount).toLocaleString("vi-VN")}đ
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-                <div className="t_a p_t8">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => navigate("/home/income")}
-                  >
-                    Thêm giao dịch
-                  </Button>
                 </div>
               </div>
             </div>
-            <div className="second_item_element b_r20">
-              <div className="p_20">
-                <div className="t_a">Vay/Nợ</div>
+            <div className="second_item_element b_r15">
+              <div className="p_10">
+                <div
+                  className="t_a"
+                  style={{ cursor: "pointer" }}
+                  onClick={() => navigate("/home/lend")}
+                >
+                  Vay/Nợ
+                </div>
                 <div className="p_t8">
                   <div className="scroll_home">
-                    {LEND.map((item) => (
+                    {transactionTypes.lend.map((item) => (
                       <div
                         key={item.id}
-                        className="b_g b_r15 p_10 m_t5 d_f a_i j_cs"
+                        className="b_gx b_r15 p_10 m_t5 d_f a_i j_cs"
                       >
                         <div className="d_f a_i">
                           <img
@@ -259,25 +243,18 @@ const Home = () => {
                           />
                           <div className="p_l10">{item.name}</div>
                         </div>
-                        <div className="">{item.money}VND</div>
+                        <div className="">
+                          {Number(item.amount).toLocaleString("vi-VN")}đ
+                        </div>
                       </div>
                     ))}
                   </div>
-                </div>
-                <div className="t_a p_t8">
-                  <Button
-                    variant="contained"
-                    size="small"
-                    onClick={() => navigate("/home/lend")}
-                  >
-                    Thêm giao dịch
-                  </Button>
                 </div>
               </div>
             </div>
           </div>
           <div className="third_item">
-            <div className="third_item_element b_r20">
+            <div className="third_item_element b_r15">
               <div className="p_20 w_100">
                 <div className="d_f a_i">
                   <div className="f_s20 p_r10">Đầu tư cùng TideSquare</div>
@@ -307,10 +284,9 @@ const Home = () => {
                 <div className="d_f p_t8">
                   <div className="w_100 b_gx b_r15 ">
                     <div className="h_130p m_tb20 b_gw ">
-                      <div
-                        className="p_20 h_90p d_f g_20 "
-                        style={{ maxWidth: "500px" }}
-                      ></div>
+                      <div className="p_10 d_f g_20 ">
+                        <div className="b_g"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -318,7 +294,7 @@ const Home = () => {
             </div>
           </div>
           <div className="fourth_item">
-            <div className="fourth_item_element b_r20">
+            <div className="fourth_item_element b_r15">
               <div className="p_20 d_fc w_100">
                 <div className="d_f w_100">
                   <div className="w_50 t_a b_s">Tổng chi</div>
@@ -326,41 +302,46 @@ const Home = () => {
                 </div>
                 <div className="h_100 p_t8">
                   <div className="h_100 b_r15">
-                    <div className="p_10">
-                      {/* <Line data={data} options={options} /> */}
-                    </div>
+                    <div className="p_10"></div>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="fourth_item_element b_r20">
-              <div className="p_20 w_100">
-                <div>Sổ giao dịch</div>
-                <div className=" p_t8">
-                  <div className="scroll_log">
-                    <div className="w_100 b_g b_r15">
-                      <div className="p_10">
-                        <div className="d_f j_cs a_i">
-                          <div className="d_f a_i">
-                            <img
-                              src={fooddrink}
-                              alt="fooddrink"
-                              className="s_35"
-                            />
-                            <div className="p_l10">Ăn uống</div>
-                          </div>
-                          <div className="">1000000</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="d_f j_c p_t8">
+            <div className="fourth_item_element b_r15">
+              <div className="p_10 w_100">
+                <div className="d_f a_i j_cs">
+                  <div>Sổ giao dịch</div>
                   <div
-                    className="b_1 d_f c_y p_10 b_gx b_r20"
+                    style={{ cursor: "pointer" }}
+                    className="c_y d_f a_i"
                     onClick={() => navigate("/home/transaction_log")}
                   >
-                    <div className="">Xem chi tiết</div>
+                    <div className="p_r10"> Xem chi tiết</div>
+                    <TrendingFlat />
+                  </div>
+                </div>
+
+                <div className=" p_t8">
+                  <div className="scroll_log">
+                    {transactionLog.map((item) => (
+                      <div className="w_100 b_gx b_r15 m_t5">
+                        <div className="p_10">
+                          <div className="d_f j_cs a_i">
+                            <div className="d_f a_i">
+                              <img
+                                src={item.image}
+                                alt={item.name}
+                                className="s_35"
+                              />
+                              <div className="p_l10">{item.name}</div>
+                            </div>
+                            <div>
+                              {Number(item.amount).toLocaleString("vi-VN")} đ
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>

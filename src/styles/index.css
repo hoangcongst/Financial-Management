@@ -71,6 +71,9 @@
  .c_r {
   color: rgba(255, 42, 0, 1);
  }
+ .c_x {
+  color: rgba(0, 0, 0, 0.5);
+ }
  .p_20 {
   padding: 20px;
  }
@@ -180,6 +183,9 @@
 .b_t {
   border-top: 1px solid rgba(255, 175, 0, 1);
 } 
+.b_tx {
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
 .b_b {
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
@@ -232,8 +238,18 @@
   color: rgba(255, 42, 0, 1);
 }
 .text_green {
-  color: rgb(0, 255, 8);
+  color: rgb(60, 255, 0);
 }
 .b_bi {
   border: 1px solid rgba(0, 0, 0, 0.2);
+}
+.b_n:active {
+  border: none;
+}
+.b_n:focus {
+  border: none;
+  outline: none;
+}
+.b_n {
+  border: none;
 }

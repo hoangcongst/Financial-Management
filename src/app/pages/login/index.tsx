@@ -21,7 +21,7 @@ const Login = () => {
         url: "/auth/login",
         data: { username: userData.username, password: userData.password },
       });
-      if (response.status === 200) {
+      if (response.status === 201) {
         alert("Đăng nhập thành công!");
       }
       const data = response.data;
