@@ -1,0 +1,33 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  overflow: hidden;
+}
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  height: 100vh;
+}
+.content_main {
+  background-color: rgba(0, 0, 0, 0.05);
+  flex: 1;
+  flex-grow: 1;
+  overflow: auto;
+}
+
+@media screen and (max-width: 1024px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .slidebar {
+    display: none;
+  }
+
+  .content {
+    flex-grow: 1;
+  }
+}

@@ -1,0 +1,22 @@
+.slidebar {
+  border-right: 1px solid rgba(0, 0, 0, 0.05);
+  width: 20%;
+}
+.logo_title {
+  width: 120px;
+}
+.slidebar_menu_item {
+  color: rgba(0, 0, 0, 0.5);
+}
+.slidebar_menu_item:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 1);
+}
+.slidebar_menu_item.active {
+  box-shadow: inset 2px 0 rgba(255, 175, 0, 1);
+  background-color: rgba(0, 0, 0, 0.03);
+  color: rgba(0, 0, 0, 1);
+}
+.menu_item_icon {
+  padding: 10px 20px;
+}

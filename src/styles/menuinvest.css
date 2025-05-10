@@ -1,0 +1,9 @@
+.menu_invest_item.active {
+  box-shadow: inset 0 2px rgba(255, 175, 0, 1);
+  filter: grayscale(0%);
+  color: rgba(0, 0, 0, 1);
+}
+.menu_invest_item {
+  filter: grayscale(100%);
+  color: rgba(0, 0, 0, 0.5);
+}
